@@ -19,8 +19,7 @@ const customLogLevelsOptions = {
 };
 
 const logLevelByENV = () => {
-  const { ENV_STAGE } = process.env;
-  return ENV_STAGE === "PROD" ? "info" : "debug";
+  return process.env.ENV_STAGE === "PROD" ? "info" : "debug";
 };
 
 const customTransports = () => {
