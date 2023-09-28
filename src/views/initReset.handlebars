@@ -1,0 +1,28 @@
+<div class="container mt-5">
+  <div class="row justify-content-center">
+    <div class="col-md-6">
+      <div class="card p-3">
+        <div id="initPasswordReset">
+          <h1>Reinicia tu contraseña</h1>
+          <span>Ingresa tu email. Si existe tu cuenta asociada, te llegara un
+            email con un link para recuperar tu contraseña</span>
+          <form id="initPasswordResetForm">
+            <input
+              type="email"
+              name="email"
+              id="email"
+              placeholder="john@doe.com"
+              required
+            />
+            <button type="submit" class="btn btn-success">></button>
+          </form>
+          {{#if resetKeyError}}
+            <div class="alert alert-danger" role="alert">Invalid or expired
+              reset key. Please request a new reset</div>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="../js/initPassReset.js"></script>
