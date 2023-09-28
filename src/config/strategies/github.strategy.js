@@ -11,7 +11,7 @@ export default (clientID, clientSecret)=> new GitHubStrategy(
       clientID,
       clientSecret,
       callbackURL:
-        (ENV_STAGE === "PRO"
+        (ENV_STAGE === "PROD"
           ? APP_URL
           : "http://localhost:" + PORT ?? 4000) + "/api/sessions/github/callback",
       scope: ['user:email'],
