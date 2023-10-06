@@ -2,7 +2,6 @@ import { Router } from "express";
 import cartsRouter from "./api/carts.router.js";
 import sessionsRouter from "./api/sessions.router.js";
 import productsRouter from "./api/products.router.js";
-import { currentUserCanHaveCarts, validateSession } from "../utils/middlewares/session.validations.js";
 import { generateProducts } from "../utils/mock.generators.js";
 import { logger } from "../utils/middlewares/logger.handler.js";
 import usersRouter from "./api/user.router.js";
@@ -11,9 +10,9 @@ const apiRouter = Router()
 
 apiRouter.use("/sessions",sessionsRouter)
 
-apiRouter.use("/carts",currentUserCanHaveCarts,cartsRouter)
+apiRouter.use("/carts",cartsRouter)
 
-apiRouter.use("/products",validateSession, productsRouter)
+apiRouter.use("/products", productsRouter)
 
 apiRouter.use("/users", usersRouter)
 

@@ -9,15 +9,19 @@ import MongoStore from "connect-mongo";
 import mongoose from "mongoose";
 import initializePassport from "./config/passport.config.js";
 import passport from "passport";
-import { validateResetKey, validateSession, validateSessionAfterLogin } from "./utils/middlewares/session.validations.js";
+import { validateResetKey, validateSessionAfterLogin } from "./utils/middlewares/session.validations.js";
 import apiRouter from "./routes/api.router.js";
 import {errorHandler} from "./utils/middlewares/error.handler.js";
 import { addLogger, logger } from "./utils/middlewares/logger.handler.js";
-
+import swaggerUiExpress from "swagger-ui-express";
+import swaggerJSDoc from "swagger-jsdoc";
+import swaggerOptions from "./config/options/swagger.options.js";
 
 const MONGO_URL = `mongodb+srv://${MDB_USER}:${MDB_PASS}@${MDB_HOST}/${DATABASE_NAME}?retryWrites=true&w=majority`;
 
 const app = express();
+
+app.use(addLogger)
 
 app.use(cookieParser());
 
@@ -54,12 +58,13 @@ mongoose
   .connect(MONGO_URL, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(() => {
 
-    app.use(addLogger)
-
     logger.info("mongoose connected");
     
+    app.use('/apidocs',swaggerUiExpress.serve,swaggerUiExpress.setup(swaggerJSDoc(swaggerOptions)))
+
+
+    
     app.use("/api", apiRouter);
-    app.use(errorHandler);
 
     app.get("/login", validateSessionAfterLogin, async (req, res) => {
       res.render("login", {});
@@ -77,9 +82,42 @@ mongoose
       res.render("passwordReset",{})
     });
 
-    app.use("/",validateSession, viewsRouter);
+   
 
+    app.get("/error", (req, res) => {
+      if(req.headers["user-agent"])
+        switch (req.statusCode) {
+          case 500:
+            res.render("error", {
+              httpStatus: 500,
+              message: "An error has ocurred",
+            });
+            break;
+          default:
+            res.render("error", { httpStatus: 404, message: "Not found" });
+            break;
+        }
+      else
+      switch (req.statusCode) {
+        case 500:
+          res.status(500).send("error", {
+            httpStatus: 500,
+            message: "An error has ocurred",
+          });
+          break;
+        default:
+          res.status(404).send({ status: "Error", message: "resource not found" });
+          break;
+      }
+    }); 
 
+     app.use("/", (req,res)=>{
+      res.redirect("/login")
+     })
+
+    app.use("/", viewsRouter);
+
+    app.use(errorHandler);
 
     app.listen(PORT??4000, () => {
       logger.info(`Servidor iniciado en ${ PROD_ENDPOINT + PORT || "https://localhost:"+ 4000  +"/"} con éxito`);

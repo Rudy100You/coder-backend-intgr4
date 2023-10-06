@@ -1,0 +1,359 @@
+paths:
+  /api/carts:
+    post:
+      summary: Creates a new cart
+      consumes:
+        - application/json
+      parameters:
+        - in: body
+          name: cart
+          description: The cart to create.
+          schema:
+            type: object
+            required:
+              - products
+            properties:
+              products:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartRequestProduct'
+      responses: 
+        '204':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+  /api/carts/{cid}:
+    get:
+      summary: Get a cart by ID
+      parameters:
+        - name: cid
+          in: path
+          description: The unique ID of the cart.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+    put:
+      summary: Update an entire cart with given cart
+      consumes:
+        - application/json
+      parameters:
+        - name: cid
+          in: path
+          description: The unique ID of the cart.
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: cart
+          description: The cart content to updtate.
+          schema:
+            type: object
+            required:
+              - products
+            properties:
+              products:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CartRequestProduct'
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+    delete:
+      summary: Delete a cart by ID
+      parameters:
+        - name: cid
+          in: path
+          description: The unique ID of the cart.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+  /api/carts/{cid}/purchase:
+    post:
+      summary: Finalize purchase of cart (User must be logged in)
+      consumes:
+        - application/json
+      parameters:
+        - name: cid
+          in: path
+          description: The unique ID of the cart.
+          required: true
+          schema:
+            type: string
+        - name: email
+          in: user
+          description: the email in current session.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+  /api/carts/{cid}/product/{pid}:
+    post:
+      summary: Add a product to a cart. Increase quantity if already exists
+      consumes:
+        - application/json
+      parameters:
+        - name: cid
+          in: path
+          description: The unique ID of the cart.
+          required: true
+          schema:
+            type: string
+        - name: pid
+          in: path
+          description: The unique ID of the product.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+    put:
+      summary: Update an product quantity in cart
+      consumes:
+        - application/json
+      parameters:
+        - name: cid
+          in: path
+          description: The unique ID of the cart.
+          required: true
+          schema:
+            type: string
+        - name: pid
+          in: path
+          description: The unique ID of the cart.
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: product
+          description: the product to updatee.
+          schema:
+            type: object
+            required:
+              - products
+            properties:
+              quantity:
+                type: integer
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+    delete:
+      summary: Remove a product from a cart
+      consumes:
+        - application/json
+      parameters:
+        - name: cid
+          in: path
+          description: The unique ID of the cart.
+          required: true
+          schema:
+            type: string
+        - name: pid
+          in: path
+          description: The unique ID of the product.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+components:
+  schemas:
+    GenericResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+
+    CartResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        payload:
+          $ref: '#/components/schemas/CartResponsePayload'
+
+    CartResponsePayload:
+      type: object
+      properties:
+        _id:
+          type: string
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/CartResponseProduct'
+
+    CartRequestProduct:
+      type: object
+      properties:
+        product:
+          type: string
+          description: The unique ID of product
+        quantity:
+          type: integer
+          description: The quantity of the product
+
+    CartResponseProduct:
+      type: object
+      properties:
+        product:
+          $ref: '#/components/schemas/ProductDetails'
+        quantity:
+          type: integer
+          description: The quantity of the product
+
+    ProductDetails:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: The product ID
+        title:
+          type: string
+          description: The product title
+        description:
+          type: string
+          description: The product description
+        price:
+          type: number
+          description: The product price
+        thumbnail:
+          type: string
+          description: The product thumbnail
+        code:
+          type: string
+          description: The product code
+        stock:
+          type: integer
+          description: The product stock
+

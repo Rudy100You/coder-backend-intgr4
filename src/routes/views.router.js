@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { currentUserCanHaveCarts } from "../utils/middlewares/session.validations.js";
+import { currentUserCanHaveCarts, validateSession } from "../utils/middlewares/session.validations.js";
 import ProductController from "../controllers/product.controller.js";
 import ProductRepository from "../dao/repository/product.repository.js";
 import ProductService from "../services/product.service.js";
@@ -11,6 +11,16 @@ const viewsRouter = Router();
 const productService = new ProductService(new ProductRepository())
 const productController = new ProductController(productService)
 const cartController = new CartController(new CartService(productService, new CartRepository()), productService)
+
+const validRoutes = ['product','products','cart','carts','profile']
+const validateValidRouteOrNotExists = (req,res,next)=>{
+  if(!validRoutes.includes(req.params.route))
+    res.status(404).redirect('/error')
+  else
+    next();
+}
+
+viewsRouter.use('/:route',validateValidRouteOrNotExists,validateSession);
 
 viewsRouter.get("/products", (req, res) => {
   res.redirect("/products/1");
@@ -63,20 +73,6 @@ viewsRouter.get("/", (req, res) => {
 
 viewsRouter.get("/profile", (req, res) => {
   res.render("profile", { user: req.session.passport.user });
-});
-
-viewsRouter.get("/error", (req, res) => {
-  switch (req.statusCode) {
-    case 500:
-      res.render("error", {
-        httpStatus: 500,
-        message: "An error has ocurred",
-      });
-      break;
-    default:
-      res.render("error", { httpStatus: 404, message: "Not found" });
-      break;
-  }
 });
 
 

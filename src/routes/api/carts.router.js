@@ -4,6 +4,7 @@ import ProductRepository  from "../../dao/repository/product.repository.js";
 import CartController from "../../controllers/cart.controller.js"
 import CartService from "../../services/cart.service.js";
 import CartRepository from "../../dao/repository/cart.repository.js";
+import { currentUserCanHaveCarts } from "../../utils/middlewares/session.validations.js";
 
 
 const cartsRouter = Router();
@@ -11,6 +12,8 @@ const productService = new ProductService(new ProductRepository)
 const cartController = new CartController(new CartService(productService, new CartRepository()), productService)
 
 cartsRouter.get("/:cid", cartController.getCart);
+
+cartsRouter.use(currentUserCanHaveCarts);
 cartsRouter.post("/", cartController.createCart);
 cartsRouter.post("/:cid/product/:pid", cartController.insertCartProduct);
 cartsRouter.delete("/:cid/product/:pid", cartController.deleteCartProduct);

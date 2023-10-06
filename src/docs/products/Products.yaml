@@ -1,0 +1,250 @@
+paths:
+  /api/products:
+    get:
+      summary: Get all products by paginaation
+      parameters:
+        - name: page
+          in: query
+          description: The page number for pagination (e.g., 1, 2, 3)
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: The number of items per page (e.g., 10, 20, 50)
+          required: false
+          schema:
+            type: integer
+        
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+    post:
+      summary: Create a new product
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '204':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+  /api/products/{pid}:
+    get:
+      summary: Get a product by ID
+      parameters:
+        - name: pid
+          in: path
+          description: The unique ID of the product.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+    put:
+      summary: Update an entire product with given product ID
+      consumes:
+        - application/json
+      parameters:
+        - name: pid
+          in: path
+          description: The unique ID of the product.
+          required: true
+          schema:
+            type: string
+        - in: body
+          name: cart
+          description: The product content to updtate.
+          schema:
+            type: object
+            required:
+              - products
+            properties:
+              products:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+    delete:
+      summary: Delete a product by ID
+      parameters:
+        - name: pid
+          in: path
+          description: The unique ID of the product.
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        '403':
+          description: Forbidden access to make request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+        "500":
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GenericResponse'
+components:
+  schemas:
+    GenericResponse:
+      type: object
+      properties:
+        status:
+          type: string
+        message:
+          type: string
+    CreateProductRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          description: The title of the product
+        description:
+          type: string
+          description: The description of the product
+        code:
+          type: integer
+          description: The product code
+        price:
+          type: number
+          description: The price of the product
+        stock:
+          type: integer
+          description: The stock quantity of the product
+        category:
+          type: string
+          description: The category of the product
+        thumbnails:
+          type: array
+          items:
+            type: string
+            description: URL(s) of product thumbnails
+    ProductListResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: The status of the response
+        payload:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        limit:
+          type: integer
+          description: The number of items per page
+        totalPages:
+          type: integer
+          description: The total number of pages
+        page:
+          type: integer
+          description: The current page number
+        hasPrevPage:
+          type: boolean
+          description: Indicates if there is a previous page
+        hasNextPage:
+          type: boolean
+          description: Indicates if there is a next page
+        prevPage:
+          type: integer
+          description: The previous page number (if available)
+        nextPage:
+          type: integer
+          description: The next page number (if available)
+        prevLink:
+          type: string
+          description: Link to the previous page (if available)
+        nextLink:
+          type: string
+          description: Link to the next page (if available)
+    Product:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: The product ID
+        title:
+          type: string
+          description: The product title
+        description:
+          type: string
+          description: The product description
+        price:
+          type: number
+          description: The product price
+        thumbnail:
+          type: string
+          description: The product thumbnail
+        code:
+          type: string
+          description: The product code
+        stock:
+          type: integer
+          description: The product stock quantity
+        id:
+          type: string
+          description: An additional ID field (if needed)

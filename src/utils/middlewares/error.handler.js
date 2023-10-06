@@ -19,6 +19,10 @@ export const errorHandler = (error,req,res, next)=>{
     if (error instanceof SyntaxError && error.status === 400 && 'body' in error) {
         return res.status(400).send({ status: "error", message: "Request is malformed. Please Check Syntax." });
     }
+
+    if(error.status === 403)
+    return res.status(403).send({ status: "error", message: "You are not allowed to make this request. Check if You are logged in" });
+
     if(Object.values(ErrorTypes.MDB_ERROR).includes(error.name))
     {
         error = findLowestMDBError(error)

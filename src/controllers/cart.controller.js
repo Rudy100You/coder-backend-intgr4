@@ -40,7 +40,7 @@ export default class CartController {
   getCart = async (req, res) => {
     let cartID = req.params.cid;
     try {
-      const cart = await this.cartService.getOne(cartID);
+      const cart = await this.cartService.findcartById(cartID);
       res.json({ status: "success", payload: cart });
     } catch (err) {
       err.notFoundEntity = "Cart";

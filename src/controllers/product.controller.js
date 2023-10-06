@@ -13,7 +13,7 @@ export default class ProductController {
 
     if (!limit || parseInt(limit) === 0) limit = 10;
     this.productService
-      .getAllPaginated(limit, page, query, sort)
+      .getAllProductsPaginated(limit, page, query, sort)
       .then((pagRes) => {
         responseBodyMapping = pagRes;
         if (
