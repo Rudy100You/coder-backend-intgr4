@@ -7,38 +7,42 @@ export default class ProductController {
     this.productService = productService;
   }
 
-  getAllProducts = (req, res) => {
-    let responseBodyMapping;
-    let { limit, page, query, sort } = req.query;
+  getAllProducts = async (req, res, next) => {
+    try {
+      let responseBodyMapping;
+      let { limit, page, query, sort } = req.query;
 
-    if (!limit || parseInt(limit) === 0) limit = 10;
-    this.productService
-      .getAllProductsPaginated(limit, page, query, sort)
-      .then((pagRes) => {
-        responseBodyMapping = pagRes;
-        if (
-          page &&
-          (responseBodyMapping.totalPages < parseInt(page) ||
-            parseInt(page) < 1 ||
-            isNaN(page))
-        ) {
-          let err = new Error("Requested page doesn't exist");
-          err.status = 404;
-          throw err;
+      if (!limit || parseInt(limit) === 0) limit = 10;
+      const pagRes = await this.productService
+        .getAllProductsPaginated(limit, page, query, sort)
+  
+          responseBodyMapping = pagRes;
+          if (
+            page &&
+            (responseBodyMapping.totalPages < parseInt(page) ||
+              parseInt(page) < 1 ||
+              isNaN(page))
+          ) {
+            CustomError.throwNewError({name:ErrorTypes.INLINE_CUSTOM_ERROR, message:"Requested products page doesn't exist", status: 404});
+          }
+
+          const linkURL =
+            req.protocol + "://" + req.get("host") + req.baseUrl + "?page=";
+          responseBodyMapping.prevLink = null;
+          responseBodyMapping.nextLink = null;
+
+          if (responseBodyMapping.prevPage)
+            responseBodyMapping.prevLink =
+              linkURL + responseBodyMapping.prevPage;
+          if (responseBodyMapping.nextPage)
+            responseBodyMapping.nextLink =
+              linkURL + responseBodyMapping.nextPage;
+
+          res.json({ status: "success", ...responseBodyMapping });
         }
-
-        const linkURL =
-          req.protocol + "://" + req.get("host") + req.baseUrl + "?page=";
-        responseBodyMapping.prevLink = null;
-        responseBodyMapping.nextLink = null;
-
-        if (responseBodyMapping.prevPage)
-          responseBodyMapping.prevLink = linkURL + responseBodyMapping.prevPage;
-        if (responseBodyMapping.nextPage)
-          responseBodyMapping.nextLink = linkURL + responseBodyMapping.nextPage;
-
-        res.json({ status: "success", ...responseBodyMapping });
-      });
+     catch (error) {
+      next(error);
+    }
   };
   getProduct = (req, res, next) => {
     let productID = req.params.pid;
@@ -52,23 +56,27 @@ export default class ProductController {
         next(err);
       });
   };
-  createProduct = async (req, res) => {
-    const newProduct = req.body;
-    const productFound = await this.productService.existsByCriteria({
-      code: newProduct.code,
-    });
-    if (productFound) {
-      CustomError.throwNewError({
-        name: ErrorTypes.ENTITY_ALREADY_EXISTS_ERROR,
-        cause: "Provided product already exists",
-        message: `Product with code ${newProduct.code}  already exists`,
-        customParameters: { entity: "Product", entityID: newProduct.code },
+  createProduct = async (req, res, next) => {
+    try {
+      const newProduct = req.body;
+      const productFound = await this.productService.existsByCriteria({
+        code: newProduct.code,
       });
-    } else {
-      await this.productService.createProduct(newProduct);
-      res
-        .status(201)
-        .json({ status: "success", payload: "Product created successfully" });
+      if (productFound) {
+        CustomError.throwNewError({
+          name: ErrorTypes.ENTITY_ALREADY_EXISTS_ERROR,
+          cause: "Provided product already exists",
+          message: `Product with code ${newProduct.code}  already exists`,
+          customParameters: { entity: "Product", entityID: newProduct.code },
+        });
+      } else {
+        await this.productService.createProduct(newProduct);
+        res
+          .status(201)
+          .json({ status: "success", payload: "Product created successfully" });
+      }
+    } catch (error) {
+      next(error);
     }
   };
 
@@ -77,9 +85,7 @@ export default class ProductController {
     const modProduct = req.body;
 
     try {
-      if (
-        await this.#validateProdManipulationByUser(req.user, productID)
-      ) {
+      if (await this.#validateProdManipulationByUser(req.user, productID)) {
         await this.productService.updateProduct(productID, modProduct);
         return res
           .status(200)
@@ -100,9 +106,7 @@ export default class ProductController {
   deleteProduct = async (req, res, next) => {
     const productID = req.params.pid;
     try {
-      if (
-        await this.#validateProdManipulationByUser(req.user, productID)
-      ) {
+      if (await this.#validateProdManipulationByUser(req.user, productID)) {
         await this.productService.delete(productID);
         res
           .status(200)
@@ -121,9 +125,11 @@ export default class ProductController {
   };
 
   async #validateProdManipulationByUser(user, productID) {
-    return equalsIgnoreCase(user.role, "ADMIN") ||
+    return (
+      equalsIgnoreCase(user.role, "ADMIN") ||
       (equalsIgnoreCase(user.role, "PREMIUM") &&
         (await this.productService.findproductById(productID)).owner ===
-        user.email);
+          user.email)
+    );
   }
 }

@@ -14,5 +14,6 @@ export const {
   PROD_ENDPOINT,
   GH_SESSION_SECRET,
   GH_CLIENT_ID,
-  PERSISTENCE
+  PERSISTENCE,
+  APP_URL
 } = process.env;

@@ -2,7 +2,7 @@ import { Router } from "express";
 import cartsRouter from "./api/carts.router.js";
 import sessionsRouter from "./api/sessions.router.js";
 import productsRouter from "./api/products.router.js";
-import { generateProducts } from "../utils/mock.generators.js";
+import { generateProduct } from "../utils/mock.generators.js";
 import { logger } from "../utils/middlewares/logger.handler.js";
 import usersRouter from "./api/user.router.js";
 
@@ -17,13 +17,16 @@ apiRouter.use("/products", productsRouter)
 apiRouter.use("/users", usersRouter)
 
 apiRouter.get("/mockingproducts", (req,res)=>{
+    let {q} = req.query
+    if(isNaN(q))
+        q = undefined
     const products =  (arr = [])=>{
-        for(let i =0; i<100; i++)
-            arr.push(generateProducts())
+        for(let i =0; i < (q ?? 100); i++)
+            arr.push(generateProduct())
         return arr
     }
 
-    res.status('200').send({products: products()})
+    res.status(200).send({products: products()})
 
 })
 

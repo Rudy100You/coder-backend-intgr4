@@ -1,25 +1,35 @@
 import { Router } from "express";
 import passport from "passport";
-import { validateSession } from "../../utils/middlewares/session.validations.js";
+import {
+  isAPIrequest,
+  validateSession,
+} from "../../utils/middlewares/session.validations.js";
+import { logger } from "../../utils/middlewares/logger.handler.js";
 
 const sessionsRouter = Router();
 
 sessionsRouter.post(
   "/register",
   passport.authenticate("register", {
-    failureRedirect: "/error",
-    successRedirect: "/login",
+    failureRedirect: "/error"
   }),
   (req, res) => res.status(200)
 );
 
 sessionsRouter.post(
-  "/login",
-  passport.authenticate("login", { successRedirect: "/profile" }),
-  () => {
-    return true;
-  }
+  "/login",(req,res,next)=>{
+    logger.debug("login endpoint reached")
+    next()
+  } ,
+    passport.authenticate(
+      "login", {failureRedirect: "/error"} ), (req,res)=>{
+        if(isAPIrequest) {
+          return res.status(200).send({status:"success", message:"Logged in successfully"});
+        }
+        res.redirect("/login");
+      }
 );
+
 sessionsRouter.get(
   "/github",
   passport.authenticate("github"),
@@ -43,11 +53,13 @@ sessionsRouter.use(validateSession);
 sessionsRouter.get("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      console.error("Error destroying session:", err);
-      res.redirect(500, "/error");
-    } else {
-      res.redirect("/login");
+      //logger.error("Error destroying session:", err);
+      return res.redirect(500, "/error");
+    } 
+    if(isAPIrequest) {
+      return res.status(200).send({status:"success", message:"Session destroyed sucessfully"});
     }
+    res.redirect("/login");
   });
 });
 

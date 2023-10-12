@@ -10,5 +10,6 @@ export default {
   REPOSITORY_ERROR: "RepositoryError",
   ENTITY_ALREADY_EXISTS_ERROR: "EntityAlreadyExistsError",
   ENTITY_DOES_NOT_EXIST_ERROR: "EntityDoesNotExistError",
-  USER_NOT_ALLOWED_ERROR: "UserNotAllowedError"
+  USER_NOT_ALLOWED_ERROR: "UserNotAllowedError",
+  INLINE_CUSTOM_ERROR:"InlineCustomError"
 };

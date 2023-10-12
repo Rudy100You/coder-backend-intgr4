@@ -25,6 +25,7 @@ app.use(addLogger)
 
 app.use(cookieParser());
 
+logger.info("Connecting to Mongo...")
 app.use(
   session({
     store: MongoStore.create({
@@ -37,11 +38,13 @@ app.use(
     secret: GH_SESSION_SECRET,
   })
 );
-
+logger.info("Initializing passport and strategies...")
 app.use(passport.initialize())
 app.use(passport.session())
+
 initializePassport(GH_CLIENT_ID, GH_SESSION_SECRET)
 
+logger.info("Passport initialized")
 
 app.use(express.static(pathJoin(__src_dirname ,"public")));
 app.use(express.json());

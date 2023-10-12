@@ -9,7 +9,7 @@ const productManipulationPrivlegesRoles = ["ADMIN", "PREMIUM"]
 
 const resetKeyService = new ResetKeyService(new ResetKeyRepository());
 
-const isAPIrequest = (req)=>{
+export const isAPIrequest = (req)=>{
   return req.baseUrl.includes('/api')
 }
 
