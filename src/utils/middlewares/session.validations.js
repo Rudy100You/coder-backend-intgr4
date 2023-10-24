@@ -10,7 +10,7 @@ const productManipulationPrivlegesRoles = ["ADMIN", "PREMIUM"]
 const resetKeyService = new ResetKeyService(new ResetKeyRepository());
 
 export const isAPIrequest = (req)=>{
-  return req.baseUrl.includes('/api')
+  return req.baseUrl.includes('/api') || !req.headers['User-Agent']
 }
 
 const isValidRole= (currentUserRole)=> allRoles.some((role)=>equalsIgnoreCase(currentUserRole,role))

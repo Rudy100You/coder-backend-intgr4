@@ -11,9 +11,10 @@ const sessionsRouter = Router();
 sessionsRouter.post(
   "/register",
   passport.authenticate("register", {
-    failureRedirect: "/error"
+    failureRedirect: "/error",
+    passReqToCallback: true
   }),
-  (req, res) => res.status(200)
+  (req, res) => res.status(201).send({status:"success", message:"User registered successfully"})
 );
 
 sessionsRouter.post(

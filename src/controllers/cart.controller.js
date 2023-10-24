@@ -71,7 +71,7 @@ export default class CartController {
   insertCartProduct = async (req, res, next) => {
     try {
       const { cid, pid } = req.params;
-      await this.validateProduct(pid);
+      await this.validateProduct(pid, req.user);
       await this.cartService.insertCartProducts(cid, pid);
       res
         .status(201)

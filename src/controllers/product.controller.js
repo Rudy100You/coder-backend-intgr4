@@ -58,7 +58,7 @@ export default class ProductController {
   };
   createProduct = async (req, res, next) => {
     try {
-      const newProduct = req.body;
+      const newProduct = {...req.body, owner: req.user.email};
       const productFound = await this.productService.existsByCriteria({
         code: newProduct.code,
       });

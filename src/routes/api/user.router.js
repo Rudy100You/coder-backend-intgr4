@@ -4,7 +4,6 @@ import UserService from "../../services/user.service.js";
 import UserRepository from "../../dao/repository/user.repository.js";
 import { Router } from "express";
 import UserController from "../../controllers/user.controller.js";
-import { currentUserIsAdmin } from "../../utils/middlewares/session.validations.js";
 
 const usersRouter = Router();
 
@@ -14,6 +13,6 @@ usersRouter.post("/reset-password", userController.resetPassword);
 
 usersRouter.post("/reset-password/send-email", userController.sendResetEmail);
 
-usersRouter.get("/premium/:uid", currentUserIsAdmin, userController.toggleUserPremiumRole);
+usersRouter.get("/premium/:uid", userController.toggleUserPremiumRole);
 
 export default usersRouter;

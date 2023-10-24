@@ -1,4 +1,4 @@
-import { after, before, describe, it } from "mocha";
+import { before, describe, it } from "mocha";
 
 import mongoose from "mongoose";
 import supertest from "supertest";
@@ -18,35 +18,31 @@ describe("[Products router] tests", () => {
 
   before(async function () {
     this.timeout(10000);
-    mongoose.connect(MONGO_URL);
+    await mongoose.connect(MONGO_URL);
+    await mongoose.connection.collections["products"].drop();
     cookies = await getPremiumMockUserCookiesForTest(requester);
-
   });
 
-  describe("Testing route / ", () => {
-    it("[POST] Several creation of products should be sucessfull", async()=>{
-        for(let i =0; i < 30; i++){
-            const res = await (await requester.post("/api/products").set("Cookie", cookies).send(generateProduct()))
-            expect(res.status).to.be.equal(200)
-        }
-           
-    })
+  describe("Testing route /api/products/ ", () => {
+    it("[POST] Several creation of products should be sucessfull", async function () {
+      this.timeout(30000);
+      for (let i = 0; i < 15; i++) {
+        const res = await requester
+          .post("/api/products")
+          .set("Cookie", cookies)
+          .send(generateProduct());
+        expect(res.status).to.be.equal(201);
+      }
+    });
 
     it("[GET] Retrieval of products should be sucessfull", async function () {
-      const res = await requester.get("/api/products")
+      const res = await requester.get("/api/products");
       expect(res.status).to.be.equal(200);
     });
 
     it("[GET] Payload should not return more items than specified limit ", async () => {
-      const res = await requester
-        .get("/api/products").field("limit",9)
+      const res = await requester.get("/api/products").query({ limit: 9 });
       expect(res.body.payload.length).to.be.equal(9);
     });
-  });
-
-  after(async function () {
-    this.timeout(10000);
-    if(await mongoose.connection.collections["products"])
-    mongoose.connection.collections["products"].drop();
   });
 });

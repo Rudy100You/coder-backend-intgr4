@@ -1,5 +1,5 @@
 import {fakerES_MX as faker} from '@faker-js/faker'
-export const generateProduct = (forInsert)=>
+export const generateProduct = (forMock)=>
 {
     const stock = faker.number.int({min:0, max: 500})
     const thumbnails = []
@@ -8,7 +8,7 @@ export const generateProduct = (forInsert)=>
         thumbnails.push(faker.image.url())
 
     return {
-        _id: forInsert ? faker.database.mongodbObjectId() : undefined,
+        _id: forMock ? faker.database.mongodbObjectId() : undefined,
         title: faker.commerce.productName(),
         description: faker.commerce.productDescription(),
         code: faker.string.alphanumeric(8),
