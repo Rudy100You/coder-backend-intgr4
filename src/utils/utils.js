@@ -45,4 +45,12 @@ export const resolveLogFileOutput = ()=>{
   return pathJoin(__src_dirname, "logs", outputFileName)
 }
 
+export const convertPublicLocalFileToURL = (path)=>{
+  let newPath = path;
+  newPath = path.replaceAll("\\", "/");
+  const publicWordIndex = newPath.indexOf("public");
+  newPath = newPath.substring(publicWordIndex, path.length)
+  newPath = `${process.env.APP_URL||`http://localhost:${process.env.PORT||4000}`}/${newPath}`
+  return newPath;
+}
 export const validateEmailFormat= (email)=> new RegExp(/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/).test(email)

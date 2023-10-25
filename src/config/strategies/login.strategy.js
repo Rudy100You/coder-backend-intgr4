@@ -34,6 +34,7 @@ export default () => new Strategy(
             return done(null, false);
         }
         logger.debug(`User logged in successfully ${JSON.stringify(user)}`)
+        await userService.setLastConnected(email);
         return done(null, userService.removeSensitiveUserData(user));
       } catch (error) {
         return done(null, false);

@@ -20,8 +20,12 @@ describe("[Carts Router] tests", () => {
   before(async function () {
     this.timeout(10000);
     await mongoose.connect(MONGO_URL);
-    await mongoose.connection.collections["carts"].drop();
-    await mongoose.connection.collections["products"].drop();
+    if(mongoose.connection.collections["sessions"])
+    await mongoose.connection.collections["sessions"].drop()
+    if (mongoose.connection.collections["carts"])
+      await mongoose.connection.collections["carts"].drop();
+    if (mongoose.connection.collections["products"])
+      await mongoose.connection.collections["products"].drop();
 
     cookies = await getNonPremiumMockUserCookiesForTest(requester);
   });

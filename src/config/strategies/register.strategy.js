@@ -30,8 +30,8 @@ export default ()=> new Strategy(
           birthday,
           password: hashPassword(password),
         };
-        const result = await userService.createUser(newUser);
-        return done(null, result);
+         await userService.createUser(newUser);
+        return done();
       } catch (error) {
         return done("UserError", error);
       }

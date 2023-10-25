@@ -2,3 +2,6 @@ node_modules
 .env
 .vscode
 src/logs/*
+src/public/documents/*
+src/public/products/*
+src/public/profiles/*

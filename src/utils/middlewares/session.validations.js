@@ -29,7 +29,7 @@ export const validateSession = (req, res, next) => {
   
 export const validateSessionAfterLogin = (req, res, next) => {
 if (req.isAuthenticated()) {
-    res.redirect("/profile");
+    return res.redirect("/profile");
 } else {
     // Session is not valid or not present, redirect to login page or return an error
     next();

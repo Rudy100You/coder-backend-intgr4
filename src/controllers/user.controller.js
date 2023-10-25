@@ -1,6 +1,14 @@
 import nodemailer from "nodemailer";
-import { equalsIgnoreCase, validateEmailFormat } from "../utils/utils.js";
+import {
+  convertPublicLocalFileToURL,
+  equalsIgnoreCase,
+  validateEmailFormat,
+} from "../utils/utils.js";
 import { logger } from "../utils/middlewares/logger.handler.js";
+import CustomError from "../utils/errors/CustomError.js";
+import ErrorTypes from "../utils/errors/ErrorTypes.js";
+import fs from "fs";
+import path from "path";
 const { APP_URL, GOOGLE_APPKEY, GOOGLE_MAIL_SENDER } = process.env;
 
 //TODO: Move mail handling to a service, Improve response and error control
@@ -13,10 +21,9 @@ const mailTransport = nodemailer.createTransport({
   },
 });
 
-export default class UserController{
-  constructor(userService, resetKeyService)
-  {
-    this.userService = userService
+export default class UserController {
+  constructor(userService, resetKeyService) {
+    this.userService = userService;
     this.resetKeyService = resetKeyService;
   }
   resetPassword = async (req, res) => {
@@ -26,12 +33,14 @@ export default class UserController{
       const user = await this.userService.findUserByCriteria({
         email: resetKey.email,
       });
-      if (await this.userService.validateRepeatedPassword(user._id, newPassword)) {
+      if (
+        await this.userService.validateRepeatedPassword(user._id, newPassword)
+      ) {
         await this.userService.updateUserPassword(user._id, newPassword);
         await this.resetKeyService.deleteResetKey(resetID);
-  
+
         if (req.user) req.session.destroy();
-  
+
         return res.send({
           status: "success",
           message: "Password was sucessfully changed",
@@ -45,11 +54,11 @@ export default class UserController{
     return res
       .status(403)
       .send({ status: "error", message: "Reset key is expired or invalid" });
-  }
+  };
 
-  sendResetEmail =  async (req, res) => {
+  sendResetEmail = async (req, res) => {
     const { email } = req.body;
-  
+
     if (validateEmailFormat(email)) {
       mailTransport.sendMail({
         from: `RS CODER <${GOOGLE_MAIL_SENDER}>`,
@@ -98,24 +107,73 @@ export default class UserController{
     } else {
       res.status(422).send({ status: "error", message: "Invalid email" });
     }
-  }
+  };
 
-  toggleUserPremiumRole = async (req,res)=>{
-    const userID = req.uid;
-    const user = await this.userService.findUserById(userID)
-
-    if(user)
-    {
-      const prevRole = user.role;
-      let newRole = ""
-      if(equalsIgnoreCase(user.role, "BASIC"))
-        newRole = "PREMIUM"
-      if(equalsIgnoreCase(user.role, "PREMIUM"))
-        newRole = "BASIC"
-      await this.userService.updateUserRole(newRole)
-      logger.debug(`User role updated from [${prevRole}] to [${newRole}]`)
-      return res.send({ status: "success", message: `User role updated from [${prevRole}] to [${newRole}]` })
+  uploadDocuments = async (req, res, next) => {
+    try {
+      const { uid } = req.params;
+      if (!(await this.userService.findUserById(uid)))
+        CustomError.throwNewError({
+          name: ErrorTypes.INLINE_CUSTOM_ERROR,
+          cause: "User not found",
+          message: `User [${uid}] does not exist`,
+          status: 404,
+          customParameters: { entityType: "User", entityID: uid },
+        });
+      await Object.entries(req.files).forEach(async (entry) => {
+        if (fs.existsSync(path))
+          CustomError.throwNewError({
+            name: ErrorTypes.INLINE_CUSTOM_ERROR,
+            cause: `File [${path}] already exists`,
+            message: `File [${path}] already exists`,
+            status: 400,
+            customParameters: { entityType: "File", entityID: path },
+          });
+        await this.userService.addDocument(
+          uid,
+          entry[0],
+          convertPublicLocalFileToURL(entry[1][0].path)
+        );
+        return res
+          .status(200)
+          .send({ status: "Success", message: "User documents added" });
+      });
+    } catch (error) {
+      next(error);
     }
-    res.status(422).send({ status: "error", message: "Invalid user" });
-  }
+  };
+
+  toggleUserPremiumRole = async (req, res, next) => {
+     try {
+      const userID = req.params.uid;
+    const user = await this.userService.findUserById(userID);
+
+   
+      if (user) {
+        const prevRole = user.role;
+        let newRole = "";
+        if (equalsIgnoreCase(user.role, "BASIC")) {
+          newRole = "PREMIUM";
+          if(!(await this.userService.userIsEligibleForUpgrade(userID)))
+          CustomError.throwNewError({
+            name: ErrorTypes.INLINE_CUSTOM_ERROR,
+            cause: `User has not uploaded enough files for upgrading their account`,
+            message: `User ${userID} has not uploaded enough files for upgrading their account`,
+            status: 400,
+            customParameters: { entityType: "File", entityID: path },
+          });
+      }
+        if (equalsIgnoreCase(user.role, "PREMIUM")) newRole = "BASIC";
+        await this.userService.updateUserRole(userID,newRole);
+        logger.debug(`User role updated from [${prevRole}] to [${newRole}]`);
+        return res.send({
+          status: "success",
+          message: `User role updated from [${prevRole}] to [${newRole}]`,
+        });
+      }
+      res.status(422).send({ status: "error", message: "Invalid user" });
+    } catch (error) {
+      next(error)
+    }
+  };
 }

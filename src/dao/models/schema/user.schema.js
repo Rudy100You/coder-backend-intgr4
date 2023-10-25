@@ -1,5 +1,18 @@
 import mongoose from "mongoose";
 
+const documentSchema = mongoose.Schema({
+  name:{
+    type:String,
+    trim:true
+  },
+  reference:{
+    type :String,
+    trim: true,
+    lowercase: true,
+    match:/https?:\/\/(www\.)?[-a-zA-Z0-9@:%._+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%_+.~#?&//=]*)/
+    }
+})
+
 const userSchema = mongoose.Schema(
   {
     firstName: {
@@ -17,7 +30,7 @@ const userSchema = mongoose.Schema(
       unique: true,
       trim: true,
       lowercase: true,
-      match: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+      match: /[A-Z0-9._%+-]+@[A-Z0-9-]+.+.[A-Z]{2,4}/igm,
     },
     birthday: {
       type: Date,
@@ -32,8 +45,14 @@ const userSchema = mongoose.Schema(
       type: String,
       default: "BASIC",
     },
+    documents:{
+      type: [documentSchema]
+    },
+    last_connection:{
+      type:Date
+    }
   },
-  { versionKey: false }
+  { versionKey: false, strict: 'throw'}
 );
 
 export { userSchema };

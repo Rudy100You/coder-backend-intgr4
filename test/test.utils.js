@@ -94,3 +94,8 @@ export const getProductForTest = async () => {
   const res = await productService.createProduct(generateProduct());
   return res._doc;
 };
+
+export const getLastConnection = async (email)=>{
+  const {last_connection} = await userService.findUserByCriteria({email})
+  return last_connection;
+}

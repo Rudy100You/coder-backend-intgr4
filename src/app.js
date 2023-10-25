@@ -70,6 +70,7 @@ mongoose
     app.use("/api", apiRouter);
 
     app.get("/login", validateSessionAfterLogin, async (req, res) => {
+      
       res.render("login", {});
     });
 
@@ -114,13 +115,13 @@ mongoose
       }
     }); 
 
-     app.use("/", (req,res)=>{
-      res.redirect("/login")
-     })
-
     app.use("/", viewsRouter);
 
     app.use(errorHandler);
+
+   /* app.use((req, res) => {
+      return res.status(404).redirect("/error");
+    });*/
 
     app.listen(PORT??4000, () => {
       logger.info(`Servidor iniciado en ${ PROD_ENDPOINT + PORT || "https://localhost:"+ 4000  +"/"} con éxito`);

@@ -39,4 +39,10 @@ export class CommonMDBRepository {
     const found = await this.baseModel.findOne(criteria,null,{lean:true});
     return found;
   }
+
+  async upsertField(id, fieldname, field){
+    let fieldSet = {}
+    fieldSet[fieldname] = field;
+    await this.baseModel.findByIdAndUpdate(id, {$set:{...fieldSet}})
+  }
 }

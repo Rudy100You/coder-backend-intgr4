@@ -1,5 +1,8 @@
 import { Router } from "express";
-import { currentUserCanHaveCarts, validateSession } from "../utils/middlewares/session.validations.js";
+import {
+  currentUserCanHaveCarts,
+  validateSession,
+} from "../utils/middlewares/session.validations.js";
 import ProductController from "../controllers/product.controller.js";
 import ProductRepository from "../dao/repository/product.repository.js";
 import ProductService from "../services/product.service.js";
@@ -8,19 +11,14 @@ import CartService from "../services/cart.service.js";
 import CartRepository from "../dao/repository/cart.repository.js";
 
 const viewsRouter = Router();
-const productService = new ProductService(new ProductRepository())
-const productController = new ProductController(productService)
-const cartController = new CartController(new CartService(productService, new CartRepository()), productService)
+const productService = new ProductService(new ProductRepository());
+const productController = new ProductController(productService);
+const cartController = new CartController(
+  new CartService(productService, new CartRepository()),
+  productService
+);
 
-const validRoutes = ['product','products','cart','carts','profile']
-const validateValidRouteOrNotExists = (req,res,next)=>{
-  if(!validRoutes.includes(req.params.route))
-    res.status(404).redirect('/error')
-  else
-    next();
-}
-
-viewsRouter.use('/:route',validateValidRouteOrNotExists,validateSession);
+viewsRouter.use(validateSession);
 
 viewsRouter.get("/products", (req, res) => {
   res.redirect("/products/1");
@@ -56,7 +54,7 @@ viewsRouter.get("/product/:pid", async (req, res) => {
   res.render("product", products);
 });
 
-viewsRouter.get("/carts/:cid" ,currentUserCanHaveCarts,async (req, res) => {
+viewsRouter.get("/carts/:cid", currentUserCanHaveCarts, async (req, res) => {
   const { cid } = req.params;
   let cart;
   try {
@@ -67,13 +65,8 @@ viewsRouter.get("/carts/:cid" ,currentUserCanHaveCarts,async (req, res) => {
   res.render("cart", cart);
 });
 
-viewsRouter.get("/", (req, res) => {
-  res.send();
-});
-
 viewsRouter.get("/profile", (req, res) => {
   res.render("profile", { user: req.session.passport.user });
 });
-
 
 export default viewsRouter;
